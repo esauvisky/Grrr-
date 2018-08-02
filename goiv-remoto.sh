@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-set -o errexit; set -o errtrace; set -o pipefail # Exit on errors
+#set -o errexit; set -o errtrace; set -o pipefail # Exit on errors
 # Uncomment line below for debugging:
 #PS4=$'+ $(tput sgr0)$(tput setaf 4)DEBUG ${FUNCNAME[0]:+${FUNCNAME[0]}}$(tput bold)[$(tput setaf 6)${LINENO}$(tput setaf 4)]: $(tput sgr0)'; set -o xtrace
-__deps=( "sed" "grep" )
+__deps=( "sed" "grep" "bc" )
 for dep in ${__deps[@]}; do hash $dep >& /dev/null || (echo "$dep was not found. Please install it and try again." && exit 1); done
 
 
@@ -11,8 +11,10 @@ W=1080
 H=1920
 
 # Replay device width and height (if same nothing changes)
-dWidth=1080
-dHeight=1920
+#dWidth=1080
+#dHeight=1920
+dWidth=$(adb shell wm size | sed 's/..* \([0-9][0-9]*\)x..*/\1/')
+dHeight=$(adb shell wm size | sed 's/..* [0-9][0-9]*x\([0-9][0-9]*\)$/\1/')
 
 function click {
     if [[ $# -lt 2 ]]; then
