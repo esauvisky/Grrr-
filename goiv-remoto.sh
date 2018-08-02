@@ -25,7 +25,7 @@ function click {
     xx=$(echo "scale=10; x = $1 / $W; x*$dWidth " | bc | awk '{printf("%d\n",$1 + 0.5)}')
     yy=$(echo "scale=10; y = $2 / $H; y*$dHeight" | bc | awk '{printf("%d\n",$1 + 0.5)}')
 
-    echo "shell input tap $xx $yy"
+    #echo "shell input tap $xx $yy"
 
     adb shell input tap $xx $yy
 
