@@ -16,6 +16,14 @@ H=1920
 dWidth=$(adb shell wm size | sed 's/..* \([0-9][0-9]*\)x..*/\1/')
 dHeight=$(adb shell wm size | sed 's/..* [0-9][0-9]*x\([0-9][0-9]*\)$/\1/')
 
+isSameAsLastOne=0
+
+#echo "Starting clipper..."
+#adb shell "am startservice ca.zgrs.clipper/.ClipboardService"
+echo "Clearing clipboard..."
+adb shell 'am broadcast -a clipper.set -e text ""'
+
+
 function click {
     if [[ $# -lt 2 ]]; then
         echo "Must supply at least 2 arguments to click(): x y [description]"
@@ -37,22 +45,29 @@ read times
 
 
 for (( i = 0; i < times; i++ )); do
+    time=$(date +%s)
     click 752 1307 'tap blank spot'
-    click 157 1730 'tap IV button'
+
+    click 157 1730 'tap IV button and wait a lot'
+    sleep 2
+
     click 909 1730 'tap menu'
-    click 752 1307 'tap appraise'
+    click 752 1307 'tap appraise and wait'
+    sleep 1
+    click 752 1307 'tap and wait a looot'
+    sleep 5
 
     click 752 1307 'tap and wait'
-    sleep 0.8
+    sleep 0.75
 
     click 752 1307 'tap and wait'
-    sleep 0.8
+    sleep 0.75
 
     click 752 1307 'tap and wait'
-    sleep 0.8
+    sleep 0.75
 
     click 752 1307 'tap and wait'
-    sleep 0.8
+    sleep 0.75
 
     click 100 1300 'tap'
 
@@ -64,48 +79,45 @@ for (( i = 0; i < times; i++ )); do
     click 770 650 'tap calculate IV'
 
     pokemon=$(adb shell am broadcast -a clipper.get)
-    pokemon=$(adb shell am broadcast -a clipper.get)
     pokemon=$(echo ${pokemon} | sed 's/.*data\=\"\([A-Z0-9\-+][\A-Za-z0-9+-]*\).*/\1/')
 
-    isBadClipboard=$(echo $final | grep 'PokemonId' -c)
-
-
-    if [ -z $isSameAsLastOne ]; then
-        isSameAsLastOne=0
-    fi
+    isBadClipboard=$(echo $pokemon | egrep 'PokemonId|Broadcasting|Intent' -c)
 
     if [ "$lastPokemon" == "$pokemon" ]; then
         isSameAsLastOne=1
+    else
+        isSameAsLastOne=0
     fi
 
     click 1000 1320 'tap close button'
 
 
-    #if [ "$isBadClipboard" => "1" ] | [ "$isSameAsLastOne" == "1" ]
     if [[ $isBadClipboard -ge "1" || $isSameAsLastOne -ge "1" ]]; then
         echo "something happened, pokemon is $pokemon, lastPokemon is $lastPokemon"
+        echo isBadClipboard$isBadClipboard
+        echo isSameAsLastOne$isSameAsLastOne
         echo "bye bye!"
         skipRename=1
     else
-        echo "renaming pokemon $pokemon"
+        echo "renaming pokemon $pokemon. wait a lot..."
+        sleep 1.5
         skipRename=0
     fi
+
     lastPokemon="$pokemon"
 
-
-    if [ "$skipRename" != "1" ]
-    then
+    if [ "$skipRename" != "1" ]; then
         click 540 880 'tap name'
 
         adb shell input keyevent KEYCODE_PASTE
-        click 970 1200 'tap ok and wait'
-        sleep 0.3
-        click 520 1030 'clicking ok on pokemon and wait'
-        sleep 0.3
+        adb shell input keyevent TAB
+        adb shell input keyevent KEYCODE_ENTER
+        click 520 1030 'clicking ok on pokemon'
 
     fi
 
     echo 'moving on...'
     sleep 1.2
     adb shell input swipe 900 1140 160 1140 500
+    echo "The round took $(( $(date +%s) - $time )) seconds"
 done
