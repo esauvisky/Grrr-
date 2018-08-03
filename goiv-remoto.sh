@@ -6,6 +6,23 @@ __deps=( "sed" "grep" "bc" )
 for dep in ${__deps[@]}; do hash $dep >& /dev/null || (echo "$dep was not found. Please install it and try again." && exit 1); done
 
 
+# Calculates for how long we should run the auto renamer
+echo "Run for how long? [10 minutes]"
+read timeToRename
+timePassedUntilNow=0
+timeStartedRenaming=$(date +%s)
+timeToRename=$(( $(date +%s -d "+ $timeToRename") - $timeStartedRenaming ))
+if [[ ! $timeToRename -ge 0 ]]; then
+    echo "Error! Please input date in valid format, see examples:"
+    echo "+16 minutes"
+    echo "+2hours"
+    exit
+else
+    echo "Running for a total of ${timeToRename} seconds..."
+fi
+
+$totalPokemonRenamed=0
+
 # Original device width and height
 W=1080
 H=1920
@@ -16,12 +33,10 @@ H=1920
 dWidth=$(adb shell wm size | sed 's/..* \([0-9][0-9]*\)x..*/\1/')
 dHeight=$(adb shell wm size | sed 's/..* [0-9][0-9]*x\([0-9][0-9]*\)$/\1/')
 
-isSameAsLastOne=0
-
 #echo "Starting clipper..."
 #adb shell "am startservice ca.zgrs.clipper/.ClipboardService"
 echo "Clearing clipboard..."
-adb shell 'am broadcast -a clipper.set -e text ""'
+adb shell 'am broadcast -a clipper.set -e text ""' &>/dev/null
 
 
 function click {
@@ -40,46 +55,43 @@ function click {
     [[ ! -z $3 ]] && echo $3 || true
 }
 
-echo "how many times? [300] "
-read times
 
+for (( t = 0; t <= timeToRename; t++ )); do
+    timePerRound=$(date +%s)
+    click 752 1307 'Tap blank spot'
 
-for (( i = 0; i < times; i++ )); do
-    time=$(date +%s)
-    click 752 1307 'tap blank spot'
-
-    click 157 1730 'tap IV button and wait a lot'
-    sleep 2
-
-    click 909 1730 'tap menu'
-    click 752 1307 'tap appraise and wait'
+    click 157 1730 'Tap IV button and wait'
     sleep 1
-    click 752 1307 'tap and wait a looot'
+
+    click 909 1730 'Tap menu'
+    click 752 1307 'Tap appraise and wait'
+    sleep 1
+    click 752 1307 'Tap and wait a looot'
     sleep 5
 
-    click 752 1307 'tap and wait'
+    click 752 1307 'Tap and wait'
     sleep 0.75
 
-    click 752 1307 'tap and wait'
+    click 752 1307 'Tap and wait'
     sleep 0.75
 
-    click 752 1307 'tap and wait'
+    click 752 1307 'Tap and wait'
     sleep 0.75
 
-    click 752 1307 'tap and wait'
+    click 752 1307 'Tap and wait'
     sleep 0.75
 
-    click 100 1300 'tap'
+    click 100 1300 'Tap'
 
-    click 100 1300 'tap'
+    click 100 1300 'Tap'
 
-    click 100 1300 'tap'
+    click 100 1300 'Tap'
 
 
-    click 770 650 'tap calculate IV'
+    click 770 650 'Tap Check IV'
 
     pokemon=$(adb shell am broadcast -a clipper.get)
-    pokemon=$(echo ${pokemon} | sed 's/.*data\=\"\([A-Z0-9\-+][\A-Za-z0-9+-]*\).*/\1/')
+    pokemon=$(echo ${pokemon} | sed 's/.*data\=\"\(..*\)".*/\1/')
 
     isBadClipboard=$(echo $pokemon | egrep 'PokemonId|Broadcasting|Intent' -c)
 
@@ -89,7 +101,7 @@ for (( i = 0; i < times; i++ )); do
         isSameAsLastOne=0
     fi
 
-    click 1000 1320 'tap close button'
+    click 1000 1320 'Tap close button'
 
 
     if [[ $isBadClipboard -ge "1" || $isSameAsLastOne -ge "1" ]]; then
@@ -99,15 +111,15 @@ for (( i = 0; i < times; i++ )); do
         echo "bye bye!"
         skipRename=1
     else
-        echo "renaming pokemon $pokemon. wait a lot..."
-        sleep 1.5
+        echo "renaming pokemon $pokemon. wait..."
+        sleep 0.75
         skipRename=0
     fi
 
     lastPokemon="$pokemon"
 
     if [ "$skipRename" != "1" ]; then
-        click 540 880 'tap name'
+        click 540 880 'Tap name'
 
         adb shell input keyevent KEYCODE_PASTE
         adb shell input keyevent TAB
@@ -119,5 +131,9 @@ for (( i = 0; i < times; i++ )); do
     echo 'moving on...'
     sleep 1.2
     adb shell input swipe 900 1140 160 1140 500
-    echo "The round took $(( $(date +%s) - $time )) seconds"
+
+    timePerRound=$(( $(date +%s) - $timePerRound ))
+    t=$((timePerRound+t))
+    let totalPokemonRenamed++
+    echo -e "The round took $(( $timePerRound )) seconds. Total time so far is $t. Total Pokémon renamed: $totalPokemonRenamed\n====================================\n"
 done
