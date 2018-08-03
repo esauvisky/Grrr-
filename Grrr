@@ -119,7 +119,7 @@ for (( t = 0; t <= timeToRename; t++ )); do
 
     click 770 650 'Tap Check IV'
 
-    if [[ ! $1 == '--no-clipper' ]]; then
+    if [[ ! $1 == '--no-clipper' ]]; then  # oi m'love
         pokemon=$(adb shell am broadcast -a clipper.get)
         pokemon=$(echo ${pokemon} | sed 's/.*data\=\"\(..*\)".*/\1/')
 

@@ -1,21 +1,21 @@
-Grrr! - GoIV remote recorded renamer
+**Grrr!** - GoIV remote recorded renamer
 =====
 
 _A shell script for renaming pokémons in Pokémon Go using GoIV, adb shells and a recorded macro._
 
 ## What does it do?
 
-Grrr! renames your pokémons in PGO programatically, i.e.: without manual intervention.
+**Grrr!** renames your pokémons in PGO programatically, i.e.: without manual intervention.
 
 After each pokémon, it swipes *left to right*, and starts again.
 
 ### Important note
 
-Grrr!'s reliability is prioritized against speed, so take a long sit if you're thinking in renaming all your Pokémons at once.
+**Grrr!**'s reliability is prioritized against speed, so take a long sit if you're thinking in renaming all your Pokémons at once.
 
 In average, it takes from **20 to 50 seconds per pokémon,** depending on the device's overall "speed", temperature _(yeah...),_ and other factors.
 
-Because of this, Grrr! takes a user input in time format, so you can rename while you're in cooldown, or doing something else.
+Because of this, **Grrr!** takes a user input in time format, so you can rename while you're in cooldown, or doing something else.
 
 
 ## How to use
@@ -32,7 +32,7 @@ Because of this, Grrr! takes a user input in time format, so you can rename whil
 
 - Dim your screen as much as possible
 
-- Run Grrr! on your computer:
+- Run **Grrr!** on your computer:
         $ ./Grrr
 
     - If you don't have **clipper** installed, run:
