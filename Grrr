@@ -28,13 +28,6 @@ fi
 
 totalPokemonRenamed=0
 
-# Original recording device width and height
-W=1080
-H=1920
-
-# Replay device width and height
-dWidth=$(adb shell wm size | sed 's/..* \([0-9][0-9]*\)x..*/\1/')
-dHeight=$(adb shell wm size | sed 's/..* [0-9][0-9]*x\([0-9][0-9]*\)$/\1/')
 
 #echo "Starting clipper..."
 #adb shell "am startservice ca.zgrs.clipper/.ClipboardService"
@@ -49,6 +42,14 @@ function getMilis {
     time=$(echo $time | sed 's/^0*//')
     echo $time
 }
+
+# Original recording device width and height
+W=1080
+H=1920
+
+# Replay device width and height
+dWidth=$(adb shell wm size | sed 's/..* \([0-9][0-9]*\)x..*/\1/')
+dHeight=$(adb shell wm size | sed 's/..* [0-9][0-9]*x\([0-9][0-9]*\)$/\1/')
 
 function click {
     if [[ $# -lt 2 ]]; then
@@ -119,7 +120,7 @@ for (( t = 0; t <= timeToRename; t++ )); do
 
     click 770 650 'Tap Check IV'
 
-    if [[ ! $1 == '--no-clipper' ]]; then  # oi m'love
+    if [[ ! $1 == '--no-clipper' ]]; then  # oi m'love, taptaptap
         pokemon=$(adb shell am broadcast -a clipper.get)
         pokemon=$(echo ${pokemon} | sed 's/.*data\=\"\(..*\)".*/\1/')
 
