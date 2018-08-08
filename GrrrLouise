@@ -97,7 +97,7 @@ totalPokemonRenamed=0
 
 for (( t = 0; t <= timeToRename; t++ )); do
     timePerRound=$(date +%s)
-    click 752 1307 'Tap blank spot' true
+    click 752 1307 'Tap blank spot'
 
     click 157 1730 'Tap IV button and wait'
     sleep 1
@@ -176,7 +176,7 @@ for (( t = 0; t <= timeToRename; t++ )); do
 
     echo 'Waiting and moving on...'
     sleep 3
-    adb shell input swipe 900 1140 160 1140 500
+    adb shell input swipe 480 650 60 650 500
 
     echo 'Waiting load...'
     sleep 2
