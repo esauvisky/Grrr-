@@ -22,6 +22,14 @@ yCloseButton=1190
 xErrorCloseButton=980
 yErrorCloseButton=976
 
+# Lou densidade 240:
+xCheckIV=800
+yCheckIV=880
+xCloseButton=980
+yCloseButton=1200
+xErrorCloseButton=980
+yErrorCloseButton=984
+
 ############# DO NOT TOUCH ANYTHING BELOW #############
 # Original recording device width and height
 W=1080
@@ -72,6 +80,66 @@ function click {
                                   echo -n $time
                                   echo "ms") || true
 }
+
+if [[ $1 == '--calibrate' || $1 == '-c' ]]; then
+    echo "Let's calibrate it!"
+    echo "MANDATORY: 'Pointer location' must be enabled on Developer Options!"
+    echo
+    echo "First, open a pokemon screen. Avoid evolutions, a Pidgey is always a good choice."
+    echo "(Try not to scroll the page vertically. If you do, swipe sideways to the next Pokémon to reset the vertical position.)"
+    echo "Then, wait a bit until GoIV's button appears, and check if it detects the Pokémon appropriately. If it doesn't, calibrate GoIV first."
+    echo "Press Enter when every step below is OK."
+    read
+    echo "Okay, now click GoIV's button and press Enter."
+    read
+    echo "A window named 'Additional Refining' should have opened."
+    echo "(If it didn't, your GoIV is not properly configured. Go back and configure it to open the appraisal window automatically)."
+    echo
+    echo "Now, hold your finger on top of the 'CHECK IV' button, and make note of the coordinates at the top of the screen. You should see something like:"
+    echo -e "\tX: 800\tY:760"
+    echo -en "Write down the X coordinate: "
+    read xCheckIV
+    echo -en "Write down the Y coordinate: "
+    read yCheckIV
+    echo -e "\nOkay, now a window named 'IV scan results' should have opened."
+    echo "Do the same as before, but this time hold your finger on top of the Close Button (X)."
+    echo -en "Write down the X coordinate: "
+    read xCloseButton
+    echo -en "Write down the Y coordinate: "
+    read yCloseButton
+    echo "We're done!"
+    echo
+    echo
+
+    echo "The new coordinates are:"
+    xx=$(echo "scale=10; x = $xCheckIV / $dWidth; x*$W " | bc | awk '{printf("%d\n",$1 + 0.5)}')
+    yy=$(echo "scale=10; y = $yCheckIV / $dHeight; y*$H" | bc | awk '{printf("%d\n",$1 + 0.5)}')
+    xCheckIV=${xx}
+    yCheckIV=${yy}
+    echo "xCheckIV=${xCheckIV}"
+    echo "yCheckIV=${yCheckIV}"
+    xx=$(echo "scale=10; x = $xCloseButton / $dWidth; x*$W " | bc | awk '{printf("%d\n",$1 + 0.5)}')
+    yy=$(echo "scale=10; y = $yCloseButton / $dHeight; y*$H" | bc | awk '{printf("%d\n",$1 + 0.5)}')
+    xCloseButton=${xx}
+    yCloseButton=${yy}
+    echo "xCloseButton=${xCloseButton}"
+    echo "yCloseButton=${yCloseButton}"
+    xErrorCloseButton=${xCloseButton}
+    yErrorCloseButton=$(echo "scale=10; $yCloseButton * 0.82" | bc | awk '{printf("%d\n",$1 + 0.5)}')
+    echo "xErrorCloseButton=${xErrorCloseButton}"
+    echo "yErrorCloseButton=${yErrorCloseButton}"
+    echo
+    echo "Now, edit this script and replace the coordinates at the beggining of the file with these four below."
+    echo "Press Enter to edit the script"
+    read
+    if [[ -f /usr/bin/gedit ]]; then
+        gedit $0
+    else
+        xdg-open $0
+    fi
+    echo "You should be good to go. Keep your dick in a vice!"
+    exit
+fi
 
 # Calculates for how long we should run the auto renamer
 echo "Run for how long? [10 minutes]"
@@ -169,9 +237,12 @@ for (( t = 0; t <= timeToRename; t++ )); do
     if [ "$skipRename" != "1" ]; then
         click 540 880 'Tap name'
 
-        adb shell input keyevent KEYCODE_PASTE
-        adb shell input keyevent TAB
-        adb shell input keyevent KEYCODE_ENTER
+        adb shell input swipe 78 533 78 533 1000
+        sleep 0.5
+        adb shell input tap 490 95
+        sleep 0.5
+        adb shell input tap 450 540
+        sleep 0.75
         click 520 1030 'Clicking OK on PGO dialog'
     fi
 
