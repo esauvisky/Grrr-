@@ -7,28 +7,12 @@ for dep in ${__deps[@]}; do hash $dep >& /dev/null || (echo "$dep was not found.
 
 #######################################################
 ############### CALIBRATION COORDINATES ###############
-## Replace these below if you're calibrating the script
-# Override density 336:
-# xCheckIV=770
-# yCheckIV=650
-# xCloseButton=1000
-# yCloseButton=1320
-
-# Override density 420:
-xCheckIV=780
-yCheckIV=800
-xCloseButton=980
-yCloseButton=1190
-xErrorCloseButton=980
-yErrorCloseButton=976
-
-# Lou densidade 240:
-xCheckIV=800
-yCheckIV=880
-xCloseButton=980
-yCloseButton=1200
-xErrorCloseButton=980
-yErrorCloseButton=984
+xCheckIV=400
+yCheckIV=440
+xCloseButton=480
+yCloseButton=600
+xErrorCloseButton=480
+yErrorCloseButton=515
 
 ############# DO NOT TOUCH ANYTHING BELOW #############
 # Original recording device width and height
@@ -36,8 +20,8 @@ W=1080
 H=1920
 
 # Replay device width and height
-dWidth=$(adb shell wm size | sed 's/..* \([0-9][0-9]*\)x..*/\1/')
-dHeight=$(adb shell wm size | sed 's/..* [0-9][0-9]*x\([0-9][0-9]*\).*$/\1/')
+dWidth=540
+dHeight=960
 
 function getMilis {
     # Counts until 10 seconds in miliseconds:
@@ -59,15 +43,19 @@ function click {
     #echo "shell input tap $xx $yy"
     time=$(getMilis)
 
+    yy=$((yy+30))
+
     if [[ $4 == "true" || $3 == "true" ]]; then
         adb shell input tap $xx $yy &
         # PID of process below
         PID=$!
         # Minimum step size
-        sleep 0.1s
+        sleep 0.2s
     else
         adb shell input tap $xx $yy
     fi
+
+    sleep 0.1
 
     [[ ! -z $3 ]] && ([[ $4 ]] && echo -n "!";
                                   echo -n $3;
@@ -80,66 +68,6 @@ function click {
                                   echo -n $time
                                   echo "ms") || true
 }
-
-if [[ $1 == '--calibrate' || $1 == '-c' ]]; then
-    echo "Let's calibrate it!"
-    echo "MANDATORY: 'Pointer location' must be enabled on Developer Options!"
-    echo
-    echo "First, open a pokemon screen. Avoid evolutions, a Pidgey is always a good choice."
-    echo "(Try not to scroll the page vertically. If you do, swipe sideways to the next Pokémon to reset the vertical position.)"
-    echo "Then, wait a bit until GoIV's button appears, and check if it detects the Pokémon appropriately. If it doesn't, calibrate GoIV first."
-    echo "Press Enter when every step below is OK."
-    read
-    echo "Okay, now click GoIV's button and press Enter."
-    read
-    echo "A window named 'Additional Refining' should have opened."
-    echo "(If it didn't, your GoIV is not properly configured. Go back and configure it to open the appraisal window automatically)."
-    echo
-    echo "Now, hold your finger on top of the 'CHECK IV' button, and make note of the coordinates at the top of the screen. You should see something like:"
-    echo -e "\tX: 800\tY:760"
-    echo -en "Write down the X coordinate: "
-    read xCheckIV
-    echo -en "Write down the Y coordinate: "
-    read yCheckIV
-    echo -e "\nOkay, now a window named 'IV scan results' should have opened."
-    echo "Do the same as before, but this time hold your finger on top of the Close Button (X)."
-    echo -en "Write down the X coordinate: "
-    read xCloseButton
-    echo -en "Write down the Y coordinate: "
-    read yCloseButton
-    echo "We're done!"
-    echo
-    echo
-
-    echo "The new coordinates are:"
-    xx=$(echo "scale=10; x = $xCheckIV / $dWidth; x*$W " | bc | awk '{printf("%d\n",$1 + 0.5)}')
-    yy=$(echo "scale=10; y = $yCheckIV / $dHeight; y*$H" | bc | awk '{printf("%d\n",$1 + 0.5)}')
-    xCheckIV=${xx}
-    yCheckIV=${yy}
-    echo "xCheckIV=${xCheckIV}"
-    echo "yCheckIV=${yCheckIV}"
-    xx=$(echo "scale=10; x = $xCloseButton / $dWidth; x*$W " | bc | awk '{printf("%d\n",$1 + 0.5)}')
-    yy=$(echo "scale=10; y = $yCloseButton / $dHeight; y*$H" | bc | awk '{printf("%d\n",$1 + 0.5)}')
-    xCloseButton=${xx}
-    yCloseButton=${yy}
-    echo "xCloseButton=${xCloseButton}"
-    echo "yCloseButton=${yCloseButton}"
-    xErrorCloseButton=${xCloseButton}
-    yErrorCloseButton=$(echo "scale=10; $yCloseButton * 0.82" | bc | awk '{printf("%d\n",$1 + 0.5)}')
-    echo "xErrorCloseButton=${xErrorCloseButton}"
-    echo "yErrorCloseButton=${yErrorCloseButton}"
-    echo
-    echo "Now, edit this script and replace the coordinates at the beggining of the file with these four below."
-    echo "Press Enter to edit the script"
-    read
-    if [[ -f /usr/bin/gedit ]]; then
-        gedit $0
-    else
-        xdg-open $0
-    fi
-    echo "You should be good to go. Keep your dick in a vice!"
-    exit
-fi
 
 # Calculates for how long we should run the auto renamer
 echo "Run for how long? [10 minutes]"
@@ -198,7 +126,7 @@ for (( t = 0; t <= timeToRename; t++ )); do
 
     click 100 1300 'Tap'
 
-    click $xCheckIV $yCheckIV 'Tap Check IV'
+    adb shell input tap $xCheckIV $yCheckIV
 
     if [[ $1 != '--no-clipper' ]]; then  # oi m'love, taptaptap
         pokemon=$(adb shell am broadcast -a clipper.get)
@@ -219,7 +147,7 @@ for (( t = 0; t <= timeToRename; t++ )); do
             echo isSameAsLastOne$isSameAsLastOne
             echo "Bye bye!"
             skipRename=1
-            click $xErrorCloseButton $yErrorCloseButton 'Closing the error message'
+            adb shell input tap $xErrorCloseButton $yErrorCloseButton
         else
             echo "Renaming pokemon $pokemon. Wait..."
             sleep 0.75
@@ -231,27 +159,27 @@ for (( t = 0; t <= timeToRename; t++ )); do
         skipRename=0
     fi
 
-    click $xCloseButton $yCloseButton 'Tap close button'
+    adb shell input tap $xCloseButton $yCloseButton
 
 
     if [ "$skipRename" != "1" ]; then
         click 540 880 'Tap name'
-
+        sleep 2
         adb shell input swipe 78 533 78 533 1000
-        sleep 0.5
+        sleep 1
         adb shell input tap 490 95
-        sleep 0.5
+        sleep 1
         adb shell input tap 450 540
-        sleep 0.75
+        sleep 1
         click 520 1030 'Clicking OK on PGO dialog'
     fi
 
     echo 'Waiting and moving on...'
-    sleep 0.75
+    sleep 3
     adb shell input swipe 900 1140 160 1140 500
 
     echo 'Waiting load...'
-    sleep 1
+    sleep 2
 
     timePerRound=$(( $(date +%s) - $timePerRound ))
     t=$((timePerRound+t))
