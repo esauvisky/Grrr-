@@ -5,35 +5,29 @@
 __deps=( "sed" "grep" "bc" "awk" )
 for dep in ${__deps[@]}; do hash $dep >& /dev/null || (echo "$dep was not found. Please install it and try again." && exit 1); done
 
+#######################################################
+############### CALIBRATION COORDINATES ###############
+## Replace these below if you're calibrating the script
+# Override density 336:
+# xCoordCheckIV=770
+# yCoordCheckIV=650
+# xCoordCloseButton=1000
+# yCoordCloseButton=1320
 
-# Calculates for how long we should run the auto renamer
-echo "Run for how long? [10 minutes]"
-read timeToRename
-# Mumbo jumbo
-[[ $timeToRename == "" ]] && timeToRename=10
-[[ $timeToRename =~ ^-?[0-9]+$ ]] && timeToRename=$timeToRename'minutes'
-timePassedUntilNow=0
-timeStartedRenaming=$(date +%s)
-timeToRename=$(( $(date +%s -d "+ $timeToRename") - $timeStartedRenaming ))
-if [[ ! $timeToRename -ge 0 ]]; then
-    echo "Error! Please input date in valid format, see examples:"
-    echo "16 minutes"
-    echo -e "16\t\t(same as below)"
-    echo "2hours"
-    echo "90 seconds"
-    exit
-else
-    echo "Running for a total of ${timeToRename} seconds..."
-fi
+# Override density 420:
+xCoordCheckIV=800
+yCoordCheckIV=800
+xCoordCloseButton=970
+yCoordCloseButton=1220
 
-totalPokemonRenamed=0
+############# DO NOT TOUCH ANYTHING BELOW #############
+# Original recording device width and height
+W=1080
+H=1920
 
-
-#echo "Starting clipper..."
-#adb shell "am startservice ca.zgrs.clipper/.ClipboardService"
-echo "Clearing clipboard..."
-adb shell 'am broadcast -a clipper.set -e text ""' &>/dev/null
-
+# Replay device width and height
+dWidth=$(adb shell wm size | sed 's/..* \([0-9][0-9]*\)x..*/\1/')
+dHeight=$(adb shell wm size | sed 's/..* [0-9][0-9]*x\([0-9][0-9]*\)$/\1/')
 
 function getMilis {
     # Counts until 10 seconds in miliseconds:
@@ -42,14 +36,6 @@ function getMilis {
     time=$(echo $time | sed 's/^0*//')
     echo $time
 }
-
-# Original recording device width and height
-W=1080
-H=1920
-
-# Replay device width and height
-dWidth=$(adb shell wm size | sed 's/..* \([0-9][0-9]*\)x..*/\1/')
-dHeight=$(adb shell wm size | sed 's/..* [0-9][0-9]*x\([0-9][0-9]*\)$/\1/')
 
 function click {
     if [[ $# -lt 2 ]]; then
@@ -85,6 +71,87 @@ function click {
                                   echo "ms") || true
 }
 
+if [[ $1 == '--calibrate' || $1 == '-c' ]]; then
+    echo "Let's calibrate it!"
+    echo "MANDATORY: 'Pointer location' must be enabled on Developer Options!"
+    echo
+    echo "First, open a pokemon screen. Avoid evolutions, a Pidgey is always a good choice."
+    echo "(Try not to scroll the page vertically. If you do, swipe sideways to the next Pokémon to reset the vertical position.)"
+    echo "Then, wait a bit until GoIV's button appears, and check if it detects the Pokémon appropriately. If it doesn't, calibrate GoIV first."
+    echo "Press Enter when every step below is OK."
+    read
+    echo "Okay, now click GoIV's button and press Enter."
+    read
+    echo "A window named 'Additional Refining' should have opened."
+    echo "(If it didn't, your GoIV is not properly configured. Go back and configure it to open the appraisal window automatically)."
+    echo
+    echo "Now, hold your finger on top of the 'CHECK IV' button, and make note of the coordinates at the top of the screen. You should see something like:"
+    echo -e "\tX: 800\tY:760"
+    echo -en "\nWrite down the X coordinate: "
+    read xCoordCheckIV
+    echo -en "\nWrite down the Y coordinate: "
+    read yCoordCheckIV
+    echo "Okay, now a window named 'IV scan results' should have opened."
+    echo "Do the same as before, but this time hold your finger on top of the Close Button (X)."
+    echo -en "\nWrite down the X coordinate: "
+    read xCoordCloseButton
+    echo -en "\nWrite down the Y coordinate: "
+    read yCoordCloseButton
+    echo "We're done!"
+    echo
+    echo
+
+    echo "The new coordinates are:"
+    xx=$(echo "scale=10; x = $xCoordCheckIV / $W; x*$dWidth " | bc | awk '{printf("%d\n",$1 + 0.5)}')
+    yy=$(echo "scale=10; y = $yCoordCheckIV / $H; y*$dHeight" | bc | awk '{printf("%d\n",$1 + 0.5)}')
+    xCoordCheckIV=${xx}
+    yCoordCheckIV=${yy}
+    echo "xCoordCheckIV=${xx}"
+    echo "yCoordCheckIV=${yy}"
+    xx=$(echo "scale=10; x = $xCoordCloseButton / $W; x*$dWidth " | bc | awk '{printf("%d\n",$1 + 0.5)}')
+    yy=$(echo "scale=10; y = $yCoordCloseButton / $H; y*$dHeight" | bc | awk '{printf("%d\n",$1 + 0.5)}')
+    xCoordCloseButton=${xx}
+    yCoordCloseButton=${yy}
+    echo "xCoordCloseButton=${xx}"
+    echo "yCoordCloseButton=${yy}"
+    echo
+    echo "Now, edit this script and replace the coordinates at the beggining of the file with these four below."
+    echo "Press Enter to edit the script"
+    read
+    if [[ -f /usr/bin/gedit ]]; then
+        gedit $0
+    else
+        xdg-open $0
+    fi
+    echo "You should be good to go. Keep your dick in a vice!"
+    exit
+fi
+
+# Calculates for how long we should run the auto renamer
+echo "Run for how long? [10 minutes]"
+read timeToRename
+# Mumbo jumbo
+[[ $timeToRename == "" ]] && timeToRename=10
+[[ $timeToRename =~ ^-?[0-9]+$ ]] && timeToRename=$timeToRename'minutes'
+timePassedUntilNow=0
+timeStartedRenaming=$(date +%s)
+timeToRename=$(( $(date +%s -d "+ $timeToRename") - $timeStartedRenaming ))
+if [[ ! $timeToRename -ge 0 ]]; then
+    echo "Error! Please input date in valid format, see examples:"
+    echo "16 minutes"
+    echo -e "16\t\t(same as below)"
+    echo "2hours"
+    echo "90 seconds"
+    exit
+else
+    echo "Running for a total of ${timeToRename} seconds..."
+fi
+totalPokemonRenamed=0
+
+#echo "Starting clipper..."
+#adb shell "am startservice ca.zgrs.clipper/.ClipboardService"
+[[ ! $1 == '--no-clipper' ]] && echo "Clearing clipboard..." && adb shell 'am broadcast -a clipper.set -e text ""' &>/dev/null
+
 
 for (( t = 0; t <= timeToRename; t++ )); do
     timePerRound=$(date +%s)
@@ -117,8 +184,7 @@ for (( t = 0; t <= timeToRename; t++ )); do
 
     click 100 1300 'Tap'
 
-
-    click 770 650 'Tap Check IV'
+    click $xCoordCheckIV $yCoordCheckIV 'Tap Check IV'
 
     if [[ ! $1 == '--no-clipper' ]]; then  # oi m'love, taptaptap
         pokemon=$(adb shell am broadcast -a clipper.get)
@@ -132,11 +198,11 @@ for (( t = 0; t <= timeToRename; t++ )); do
             isSameAsLastOne=0
         fi
 
-        click 1000 1320 'Tap close button'
+        click $xCoordCloseButton $yCoordCloseButton 'Tap close button'
 
 
         if [[ $isBadClipboard -ge "1" || $isSameAsLastOne -ge "1" ]]; then
-            echo "something happened, pokemon is $pokemon, lastPokemon is $lastPokemon"
+            echo -e "Something happened! :(\nPokemon is $pokemon, lastPokemon is $lastPokemon"
             echo isBadClipboard$isBadClipboard
             echo isSameAsLastOne$isSameAsLastOne
             echo "bye bye!"
