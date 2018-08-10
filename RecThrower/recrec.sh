@@ -1,7 +1,10 @@
 doneRecording() {
     killall eventrec 2>/dev/null
 }
-trap doneRecording SIGINT
+
+exitScript() {
+    exit
+}
 
 n=0
 while [ -f recording$n ]; do
@@ -16,6 +19,7 @@ done
 # fi
 
 echo "Press Ctrl+Z anytime to exit the script."
+echo "DONT FORGET TO MOVE eventrec to /system/bin!"
 
 echo -n "What's the Pokémon? "
 read name
@@ -32,9 +36,11 @@ read
 
 while [ -z $score ]; do
     echo "!! RECORDING !!"
+    trap doneRecording SIGINT
     eventrec -r recording$n
+    trap exitScript SIGINT
     echo 'Was it good? If you want to save it, type which score you got (Nice, Great or Excellent).'
-    echo 'Otherwise leave it empty and try again! :)'
+    echo 'Press Enter to try again, or Ctrl+C to leave.'
     read score
     if [ ! -z $score ]; then
         echo "Moving recording to ./Saved/W$pokWidth-H$pokHeight-$name-$score..."
