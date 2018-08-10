@@ -101,3 +101,55 @@ Pinsir
     - 540 910
 ## Shots
     -
+
+Onix
+=========
+## Tangentes
+    - 170 1150
+## Centro
+    - 510 810
+## Shots
+    - Prov. Excellent
+            adb shell input swipe 500 1600 500 990 100
+
+Farfetch'd
+=========
+## Tangentes
+    - 360 1070
+## Centro
+    - 540 880
+## Shots
+    - Excellent
+            input swipe 540 1800 540 1260 144
+            input swipe 540 1800 540 1270 144
+
+Spearow
+=======
+## Tangente
+    - 380 1060
+## Centro
+    - 540 900
+## Shots
+    - Quase Excellent (Matemático)
+            input swipe 540 1600 540 1440 100
+
+    - Conta:
+            start - tangente + centro
+            1600  -   1060   +   900  = 1440
+
+Venonat
+=======
+## Tangente
+    - 390 1040
+## Centro
+    - 540 880
+## Shots
+    - Muito baixo:
+            input swipe 540 1600 540 1240 100
+
+    - Um pouco alto:
+            input swipe 540 1600 540 1240 80
+
+    - 20ms fizeram uma diferença de aprox. 300px
+
+1600 - 1040 + 880
