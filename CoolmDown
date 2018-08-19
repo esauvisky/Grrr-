@@ -1,8 +1,35 @@
 #!/usr/bin/env python
 import gpxpy.geo
+import clipboard
 #import math
 #from math import sin, cos, sqrt, atan2, radians
 
+#import sys
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, Gdk
+
+
+def newClipboardDetected(*args):
+    coord = splitCoords(clip.wait_for_text())
+    if coord is not False:
+        global lastCoord
+        print("New coordinate detected: " + str(coord))
+        print("Last coordinate was: " + str(lastCoord))
+
+        lastCoord = coord
+
+
+def splitCoords(text):
+    try:
+        coord = [float(x.strip()) for x in text.split(',')]
+    except Exception as e:
+        return False
+    else:
+        if not isinstance(coord[0], float) or not isinstance(coord[1], float):
+            return False
+        else:
+            return coord
 
 
 def calculate(lon1, lat1, lon2, lat2):
@@ -169,10 +196,16 @@ def cooldown(dist):
 # long2 = float(var[3])
 
 #calc = calculate(37.802668, -122.4223910, 37.797440, -122.4031850)
-var1 = '37.802668,-122.4223910 '
-var2 = '32.878510,-117.237340'
-calc = calculate(37.802668,-122.4223910,32.878510,-117.237340)
+# var1 = '37.802668,-122.4223910 '
+# var2 = '32.878510,-117.237340'
+# calc = calculate(37.802668,-122.4223910,32.878510,-117.237340)
 
-cooldown = cooldown(calc)
-print(calc, cooldown)
+# cooldown = cooldown(calc)
+# print(calc, cooldown)
 
+
+
+
+clip = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+clip.connect('owner-change', newClipboardDetected)
+Gtk.main()

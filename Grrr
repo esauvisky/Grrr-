@@ -22,6 +22,9 @@ yCloseButton=1190
 xErrorCloseButton=980
 yErrorCloseButton=976
 
+totalPokemonRenamed=0
+totalPokemonFailed=0
+
 ############# DO NOT TOUCH ANYTHING BELOW #############
 # Original recording device width and height
 W=1080
@@ -152,15 +155,18 @@ for (( t = 0; t <= timeToRename; t++ )); do
             echo "Bye bye!"
             skipRename=1
             click $xErrorCloseButton $yErrorCloseButton 'Closing the error message'
+            let totalPokemonFailed++
         else
             echo "Renaming pokemon $pokemon. Wait..."
             sleep 0.75
             skipRename=0
+            let totalPokemonRenamed++
         fi
 
         lastPokemon="$pokemon"
     else
         skipRename=0
+        let totalPokemonRenamed++
     fi
 
     click $xCloseButton $yCloseButton 'Tap close button'
@@ -184,6 +190,6 @@ for (( t = 0; t <= timeToRename; t++ )); do
 
     timePerRound=$(( $(date +%s) - $timePerRound ))
     t=$((timePerRound+t))
-    let totalPokemonRenamed++
-    echo -e "The round took $(( $timePerRound )) seconds. Total time so far is $t. Total Pokémon renamed: $totalPokemonRenamed\n====================================\n"
+    echo -e "The round took $(( $timePerRound )) seconds. Total time so far is $t."
+    echo -e "Total Pokémon renamed: $totalPokemonRenamed\tTotal Failed: $totalPokemonFailed\n====================================\n"
 done

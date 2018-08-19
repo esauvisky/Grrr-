@@ -11,27 +11,25 @@ while [ -f recording$n ]; do
     n=$((n+1))
 done
 
-# if [ ! -f ./bin/eventrec ]; then
-#     echo "Error, eventrec is not present on ./bin"
-# elif [ ! -f /system/bin/eventrec ]; then
-#     su
-#     cp ./bin/eventrec
-# fi
+if [ ! -f /system/xbin/eventrec ]; then
+    echo "Error, eventrec is not installed. Attempting to install temporarily..."
+    sh /sdcard/.bin/install.sh
+    if [ ! -f /system/xbin/eventrec ]; then
+        echo "It doesn't look like it worked. Please check it manually. Sorrry..."
+        exit
+    fi
+fi
 
 echo "Press Ctrl+Z anytime to exit the script."
 echo "DONT FORGET TO MOVE eventrec to /system/bin!"
 
-echo -n "What's the Pokémon? "
-read name
 echo -n "What's the width from screen's left margin to the circle (in pixels)?: "
 read pokWidth
 echo -n "What's the height from the top of the screen to the bottom of the circle (i.e.: the Pokémon height from the ground)?: "
 read pokHeight
 
 echo
-echo "OK! Now adjust circle, press Enter to begin recording and wait for it to attack."
-echo "Do not touch anything else! As soon as the Pokémon attacks, throw the pokeball."
-echo "Then, press Ctrl+C to finish the recording."
+echo "Adjust the circle and press Enter to record. Press Ctrl+C when finished."
 read
 
 while [ -z $score ]; do
@@ -39,8 +37,8 @@ while [ -z $score ]; do
     trap doneRecording SIGINT
     eventrec -r recording$n
     trap exitScript SIGINT
-    echo 'Was it good? If you want to save it, type which score you got (Nice, Great or Excellent).'
-    echo 'Press Enter to try again, or Ctrl+C to leave.'
+    echo 'If the pokemon escaped, press Enter to record again.'
+    echo 'If the throw was good give it a name below. Otherwise press Ctrl+C to leave.'
     read score
     if [ ! -z $score ]; then
         echo "Moving recording to ./Saved/W$pokWidth-H$pokHeight-$name-$score..."

@@ -152,4 +152,26 @@ Venonat
 
     - 20ms fizeram uma diferença de aprox. 300px
 
-1600 - 1040 + 880
+Wailmer
+=======
+## Tangente
+    - 250 1230
+## Shots
+    - Excellent
+            input swipe 540 1600 540 980 80
+
+
+Dratini
+=======
+## Tangente
+    - 300 1040
+## Shots
+    - Try this:
+            input swipe 540 1600 540 1200 100
+
+
+Slowbro
+=======
+## Shots
+    - Perfect
+        input swipe 540 1600 540 1000 100
