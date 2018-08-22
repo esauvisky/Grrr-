@@ -11,11 +11,14 @@ from gi.repository import Gtk, Gdk
 
 
 def newClipboardDetected(*args):
+    global lastCoord
     coord = splitCoords(clip.wait_for_text())
     if coord is not False:
-        global lastCoord
         print("New coordinate detected: " + str(coord))
         print("Last coordinate was: " + str(lastCoord))
+
+        dist = calculate(lastCoord[0], lastCoord[1], coord[0], coord[1])
+        print("Distance between coords is " + str(dist))
 
         lastCoord = coord
 
