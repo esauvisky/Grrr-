@@ -1,6 +1,6 @@
 // jshint esversion: 6
 /*
-Author: Emi Bemol <esauvisky@gmail.com
+Author: Emi Bemol <esauvisky@gmail.com>
 */
 
 // Libraries

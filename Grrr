@@ -176,7 +176,7 @@ for (( t = 0; t <= timeToRename; t++ )); do
         click 540 880 'Tap name'
 
         adb shell input keyevent KEYCODE_PASTE
-        adb shell input keyevent TAB
+        adb shell input keyevent KEYCODE_TAB
         adb shell input keyevent KEYCODE_ENTER
         click 520 1030 'Clicking OK on PGO dialog'
     fi

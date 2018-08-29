@@ -1,6 +1,6 @@
 {
     "token": "NDgxMDQ0NzU2MjY1NDM1MTM2.DlwndQ.pFUYv7-Ylun141-h_nWoDGbF6zk",
-    "debugMode": true,
+    "debugMode": false,
     "watchingChannels": [
         "90community", "2600cp", "2000cp",
         "candy", "candy_hunt",
@@ -10,8 +10,6 @@
         "unown"
     ],
     "keywords": [
-        "brazil",
-        ":flag_br:",
         ":fire:",
         ":sparkles:",
         ":100:",
@@ -19,8 +17,6 @@
         "iv100"
     ],
     "niceCoords": [
-        [37,  -122, "San Francisco"],
-        [-22, -43 , "Rio de Janeiro, Brasil"],
-        [50,  6, "Colonia, Alemanha"]
+        [34, 137, "Tokyo"]
     ]
 }
