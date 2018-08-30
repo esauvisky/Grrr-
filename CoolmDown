@@ -165,23 +165,6 @@ def calculateCD(dist):
     return time
 
 
-# lat1 = float(var[0])
-# long1 = float(var[1])
-
-# lat2 = float(var[2])
-# long2 = float(var[3])
-
-#calc = calculate(37.802668, -122.4223910, 37.797440, -122.4031850)
-# var1 = '37.802668,-122.4223910 '
-# var2 = '32.878510,-117.237340'
-# calc = calculate(37.802668,-122.4223910,32.878510,-117.237340)
-
-# cooldown = cooldown(calc)
-# print(calc, cooldown)
-
-
-
-
 clip = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
 clip.connect('owner-change', newClipboardDetected)
 Gtk.main()
