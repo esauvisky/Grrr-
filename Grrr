@@ -7,12 +7,23 @@ for dep in ${__deps[@]}; do hash $dep >& /dev/null || (echo "$dep was not found.
 
 #######################################################
 ############### CALIBRATION COORDINATES ###############
-xCheckIV=400
-yCheckIV=440
-xCloseButton=480
-yCloseButton=600
-xErrorCloseButton=480
-yErrorCloseButton=515
+## Replace these below if you're calibrating the script
+# Override density 336:
+# xCheckIV=770
+# yCheckIV=650
+# xCloseButton=1000
+# yCloseButton=1320
+
+# Override density 420:
+xCheckIV=780
+yCheckIV=800
+xCloseButton=980
+yCloseButton=1190
+xErrorCloseButton=980
+yErrorCloseButton=976
+
+totalPokemonRenamed=0
+totalPokemonFailed=0
 
 ############# DO NOT TOUCH ANYTHING BELOW #############
 # Original recording device width and height
@@ -20,8 +31,8 @@ W=1080
 H=1920
 
 # Replay device width and height
-dWidth=540
-dHeight=960
+dWidth=$(adb shell wm size | sed 's/..* \([0-9][0-9]*\)x..*/\1/')
+dHeight=$(adb shell wm size | sed 's/..* [0-9][0-9]*x\([0-9][0-9]*\).*$/\1/')
 
 function getMilis {
     # Counts until 10 seconds in miliseconds:
@@ -43,19 +54,15 @@ function click {
     #echo "shell input tap $xx $yy"
     time=$(getMilis)
 
-    yy=$((yy+30))
-
     if [[ $4 == "true" || $3 == "true" ]]; then
         adb shell input tap $xx $yy &
         # PID of process below
         PID=$!
         # Minimum step size
-        sleep 0.2s
+        sleep 0.1s
     else
         adb shell input tap $xx $yy
     fi
-
-    sleep 0.1
 
     [[ ! -z $3 ]] && ([[ $4 ]] && echo -n "!";
                                   echo -n $3;
@@ -97,7 +104,7 @@ totalPokemonRenamed=0
 
 for (( t = 0; t <= timeToRename; t++ )); do
     timePerRound=$(date +%s)
-    click 752 1307 'Tap blank spot'
+    click 752 1307 'Tap blank spot' true
 
     click 157 1730 'Tap IV button and wait'
     sleep 1
@@ -126,7 +133,7 @@ for (( t = 0; t <= timeToRename; t++ )); do
 
     click 100 1300 'Tap'
 
-    adb shell input tap $xCheckIV $yCheckIV
+    click $xCheckIV $yCheckIV 'Tap Check IV'
 
     if [[ $1 != '--no-clipper' ]]; then  # oi m'love, taptaptap
         pokemon=$(adb shell am broadcast -a clipper.get)
@@ -147,42 +154,42 @@ for (( t = 0; t <= timeToRename; t++ )); do
             echo isSameAsLastOne$isSameAsLastOne
             echo "Bye bye!"
             skipRename=1
-            adb shell input tap $xErrorCloseButton $yErrorCloseButton
+            click $xErrorCloseButton $yErrorCloseButton 'Closing the error message'
+            let totalPokemonFailed++
         else
             echo "Renaming pokemon $pokemon. Wait..."
             sleep 0.75
             skipRename=0
+            let totalPokemonRenamed++
         fi
 
         lastPokemon="$pokemon"
     else
         skipRename=0
+        let totalPokemonRenamed++
     fi
 
-    adb shell input tap $xCloseButton $yCloseButton
+    click $xCloseButton $yCloseButton 'Tap close button'
 
 
     if [ "$skipRename" != "1" ]; then
         click 540 880 'Tap name'
-        sleep 2
-        adb shell input swipe 78 533 78 533 1000
-        sleep 1
-        adb shell input tap 490 95
-        sleep 1
-        adb shell input tap 450 540
-        sleep 1
+
+        adb shell input keyevent KEYCODE_PASTE
+        adb shell input keyevent KEYCODE_TAB
+        adb shell input keyevent KEYCODE_ENTER
         click 520 1030 'Clicking OK on PGO dialog'
     fi
 
     echo 'Waiting and moving on...'
-    sleep 3
-    adb shell input swipe 480 650 60 650 500
+    sleep 0.75
+    adb shell input swipe 900 1140 160 1140 500
 
     echo 'Waiting load...'
-    sleep 2
+    sleep 1
 
     timePerRound=$(( $(date +%s) - $timePerRound ))
     t=$((timePerRound+t))
-    let totalPokemonRenamed++
-    echo -e "The round took $(( $timePerRound )) seconds. Total time so far is $t. Total Pokémon renamed: $totalPokemonRenamed\n====================================\n"
+    echo -e "The round took $(( $timePerRound )) seconds. Total time so far is $t."
+    echo -e "Total Pokémon renamed: $totalPokemonRenamed\tTotal Failed: $totalPokemonFailed\n====================================\n"
 done
