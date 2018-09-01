@@ -22,6 +22,23 @@ CBLUE = '\033[34m'
 Notify.init('CoolmDown')
 
 
+def prettifyCoord(coord, n=6):
+    '''Prettifies a coordinate into a beautiful string.
+
+    Arguments:
+        coord {[float, float]} -- Pair of latitude and longitude.
+    Keyword Arguments:
+        n {int} -- Number of decimal places after the period (default: 6).
+    Returns:
+        string -- Formatted string of the lat-long pair.
+    '''
+    try:
+        if isinstance(coord[0], float) and isinstance(coord[1], float):
+            return str(format(coord[0], '.' + n + 'f') + ',' + format(coord[1], '.' + n + 'f'))
+    except Exception as e:
+        return False
+
+
 def newClipboardDetected(*args):
     '''Fires everytime the Gnome clipboard changes.
 
@@ -50,10 +67,17 @@ def newClipboardDetected(*args):
             color = CGREEN if cooldown < 10 else CYELLOW if cooldown < 30 else CRED
             print("Last coordinate was: " + CBLUE + format(lastCoord[0], '.6f') + ', ' + format(lastCoord[1], '.6f') + CEND)
             print("New coordinate is:   " + CBLUE + format(coord[0], '.6f') + ', ' + format(coord[1], '.6f') + CEND)
+
+            # stdout
+            print("Last coordinate was: " + CBLUE + prettifyCoord(lastCoord) + CEND)
+            print("New coordinate is:   " + CBLUE + prettifyCoord(currentCoord) + CEND)
             print("Cooldown is " + CBOLD + color + str(cooldown) + ' minutes' + CEND + ' (' + str(dist) + 'km)')
             print('--------------------------------------------')
-            notification = Notify.Notification.new('Cooldown is ' + str(cooldown) + ' minutes.',
-                                                   'Distance between coordinates is approx. ' + str(dist) + 'km')
+
+            # and libnotify
+            notification = Notify.Notification.new(str(cooldown) + ' minutes ' + '(' + str(dist) + 'km)',
+                                                   'From: ' + prettifyCoord(lastCoord, 3) +
+                                                   '\nTo: ' + prettifyCoord(currentCoord, 3))
             notification.set_urgency(1)
             notification.show()
         lastCoord = coord
